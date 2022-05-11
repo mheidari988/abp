@@ -39,7 +39,8 @@ public partial class UserManagement
     protected PageToolbar Toolbar { get; } = new();
 
     private List<TableColumn> UserManagementTableColumns => TableColumns.Get<UserManagement>();
-
+    private TextRole _passwordTextRole = TextRole.Password;
+    
     public UserManagement()
     {
         ObjectMapperContext = typeof(AbpIdentityBlazorModule);
@@ -90,6 +91,7 @@ public partial class UserManagement
             IsAssigned = x.IsDefault
         }).ToArray();
 
+        ChangePasswordTextRole(TextRole.Password);
         return base.OpenCreateModalAsync();
     }
 
@@ -115,6 +117,7 @@ public partial class UserManagement
                 IsAssigned = userRoleNames.Contains(x.Name)
             }).ToArray();
 
+            ChangePasswordTextRole(TextRole.Password);
             await base.OpenEditModalAsync(entity);
         }
         catch (Exception ex)
@@ -179,22 +182,25 @@ public partial class UserManagement
                     new TableColumn
                     {
                         Title = L["Actions"],
-                        Actions = EntityActions.Get<UserManagement>()
+                        Actions = EntityActions.Get<UserManagement>(),
                     },
                     new TableColumn
                     {
                         Title = L["UserName"],
                         Data = nameof(IdentityUserDto.UserName),
+                        Sortable = true,
                     },
                     new TableColumn
                     {
                         Title = L["EmailAddress"],
                         Data = nameof(IdentityUserDto.Email),
+                        Sortable = true,
                     },
                     new TableColumn
                     {
                         Title = L["PhoneNumber"],
                         Data = nameof(IdentityUserDto.PhoneNumber),
+                        Sortable = true,
                     }
             });
 
@@ -210,6 +216,18 @@ public partial class UserManagement
             requiredPolicyName: CreatePolicyName);
 
         return base.SetToolbarItemsAsync();
+    }
+
+    protected virtual void ChangePasswordTextRole(TextRole? textRole)
+    {
+        if (textRole == null)
+        {
+            ChangePasswordTextRole(_passwordTextRole == TextRole.Password ? TextRole.Text: TextRole.Password);
+        }
+        else
+        {
+            _passwordTextRole = textRole.Value;
+        }
     }
 }
 
